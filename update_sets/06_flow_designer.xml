@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 06 - Flow Designer Flow
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Defines two Flow Designer flows:
+
+    FLOW 1: Task Assignment Notification Flow
+    ─────────────────────────────────────────
+    Trigger  : Record Created → x_ptms_project_task
+    Actions  :
+      Step 1 — Look Up the assigned user's details
+      Step 2 — Send email to the assigned Team Member
+                 ("Task Assigned" notification)
+
+    FLOW 2: Task Completion Notification Flow
+    ─────────────────────────────────────────
+    Trigger  : Record Updated → x_ptms_project_task
+               Condition: state changes to '4' (Completed)
+    Actions  :
+      Step 1 — Look Up Project Manager users
+      Step 2 — Send email to all Project Managers
+                 ("Task Completed" notification)
+
+  NOTE on Flow Designer XML:
+    ServiceNow Flow Designer stores flows in the sys_hub_flow
+    table. The XML below includes the full flow definition
+    with trigger, action steps, and data pills.
+
+    For manual creation guidance, see:
+    docs/deployment_guide.md → Section 5 (Flow Designer)
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       FLOW 1: Task Assignment Notification
+       ═══════════════════════════════════════════════ -->
+  <sys_hub_flow action="INSERT_OR_UPDATE">
+    <sys_id>f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c1</sys_id>
+
+    <!-- Flow display name -->
+    <name>PTMS — Task Assignment Notification</name>
+
+    <description>
+      Triggered when a new Project Task record is created.
+      Sends an email notification to the assigned Team Member
+      informing them of the new task and its details.
+    </description>
+
+    <!-- Flow is active and will trigger automatically -->
+    <active>true</active>
+
+    <!-- Status: Published (ready to run) -->
+    <status>published</status>
+
+    <!-- Application scope -->
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+
+    <!--
+      TRIGGER DEFINITION
+      Type: record_created
+      Table: x_ptms_project_task
+      Fires once when a new record is inserted.
+    -->
+    <trigger>
+      <trigger_type>record_created</trigger_type>
+      <table>x_ptms_project_task</table>
+      <condition/>
+      <!-- Run in system context to ensure access to all fields -->
+      <run_as>system</run_as>
+    </trigger>
+
+    <!--
+      FLOW STEPS (JSON definition stored in flow_definition field)
+      The flow has two action steps:
+        1. Look Up Records — get the assigned user's email
+        2. Send Email      — fire the Task Assigned notification
+    -->
+    <flow_definition><![CDATA[
+{
+  "version": "1.0",
+  "steps": [
+    {
+      "id": "step_1",
+      "type": "action",
+      "name": "Get Assigned User Details",
+      "description": "Look up the sys_user record for the assigned team member to retrieve their email address and display name.",
+      "action": "com.glide.platform_actions.look_up_record",
+      "inputs": {
+        "table": "sys_user",
+        "filter": "sys_id={{trigger.record.assigned_to.sys_id}}"
+      },
+      "outputs": {
+        "assigned_user": "{{step_1.record}}"
+      }
+    },
+    {
+      "id": "step_2",
+      "type": "action",
+      "name": "Send Task Assigned Email Notification",
+      "description": "Send the 'Task Assigned' email notification to the assigned team member using their email address retrieved in Step 1.",
+      "action": "com.glide.platform_actions.send_notification",
+      "inputs": {
+        "notification": "x_ptms_task_assigned",
+        "record": "{{trigger.record}}",
+        "recipients": "{{step_1.assigned_user.email}}"
+      }
+    }
+  ]
+}
+    ]]></flow_definition>
+  </sys_hub_flow>
+
+  <!-- ═══════════════════════════════════════════════
+       FLOW 2: Task Completion Notification
+       ═══════════════════════════════════════════════ -->
+  <sys_hub_flow action="INSERT_OR_UPDATE">
+    <sys_id>f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c2</sys_id>
+
+    <name>PTMS — Task Completion Notification</name>
+
+    <description>
+      Triggered when a Project Task record's status changes to
+      'Completed' (state = 4). Sends an email notification to all
+      users with the Project Manager role informing them that the
+      task has been completed.
+    </description>
+
+    <active>true</active>
+    <status>published</status>
+
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+
+    <!--
+      TRIGGER DEFINITION
+      Type: record_updated
+      Table: x_ptms_project_task
+      Condition: state changes TO '4' (Completed)
+      The 'changes_to' condition ensures this fires only when the
+      status transitions TO Completed, not just when the record
+      is updated in any way.
+    -->
+    <trigger>
+      <trigger_type>record_updated</trigger_type>
+      <table>x_ptms_project_task</table>
+      <condition>
+        <field>state</field>
+        <operator>changes_to</operator>
+        <value>4</value>
+      </condition>
+      <run_as>system</run_as>
+    </trigger>
+
+    <flow_definition><![CDATA[
+{
+  "version": "1.0",
+  "steps": [
+    {
+      "id": "step_1",
+      "type": "action",
+      "name": "Get All Project Managers",
+      "description": "Look up all active users who have the x_ptms.project_manager role. This uses a GlideRecord query on sys_user_has_role joined with sys_user.",
+      "action": "com.glide.platform_actions.look_up_records",
+      "inputs": {
+        "table": "sys_user_has_role",
+        "filter": "role.name=x_ptms.project_manager^user.active=true",
+        "fields": ["user.email", "user.name", "user.sys_id"]
+      },
+      "outputs": {
+        "project_managers": "{{step_1.records}}"
+      }
+    },
+    {
+      "id": "step_2",
+      "type": "action",
+      "name": "Send Task Completed Notification to Project Managers",
+      "description": "Send the 'Task Completed' email notification to all Project Manager users identified in Step 1.",
+      "action": "com.glide.platform_actions.send_notification",
+      "inputs": {
+        "notification": "x_ptms_task_completed",
+        "record": "{{trigger.record}}",
+        "recipients": "{{step_1.project_managers.user.email}}"
+      }
+    }
+  ]
+}
+    ]]></flow_definition>
+  </sys_hub_flow>
+
+  <!-- ═══════════════════════════════════════════════
+       SCHEDULED FLOW: Overdue Task Notification
+       Trigger: Daily at 8:00 AM
+       Checks all tasks past their due date that are
+       not yet Completed, and sends the Overdue notification
+       to assigned team members and project managers.
+       ═══════════════════════════════════════════════ -->
+  <sys_hub_flow action="INSERT_OR_UPDATE">
+    <sys_id>f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c3</sys_id>
+
+    <name>PTMS — Daily Overdue Task Notification</name>
+
+    <description>
+      Scheduled flow that runs every day at 08:00 AM.
+      Finds all Project Tasks where due_date is in the past and
+      state is NOT Completed (state != 4). Sends the Task Overdue
+      notification to the assigned team member for each overdue task.
+    </description>
+
+    <active>true</active>
+    <status>published</status>
+
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+
+    <!--
+      TRIGGER: Scheduled (runs daily at 08:00)
+      Cron expression: 0 8 * * *
+    -->
+    <trigger>
+      <trigger_type>scheduled</trigger_type>
+      <schedule_type>cron</schedule_type>
+      <cron_expression>0 8 * * *</cron_expression>
+      <run_as>system</run_as>
+    </trigger>
+
+    <flow_definition><![CDATA[
+{
+  "version": "1.0",
+  "steps": [
+    {
+      "id": "step_1",
+      "type": "action",
+      "name": "Find All Overdue Tasks",
+      "description": "Query the x_ptms_project_task table for records where due_date < today AND state != 4 (not Completed).",
+      "action": "com.glide.platform_actions.look_up_records",
+      "inputs": {
+        "table": "x_ptms_project_task",
+        "filter": "due_date<javascript:gs.beginningOfToday()^state!=4"
+      },
+      "outputs": {
+        "overdue_tasks": "{{step_1.records}}"
+      }
+    },
+    {
+      "id": "step_2",
+      "type": "flow_logic",
+      "name": "For Each Overdue Task",
+      "description": "Iterate over each overdue task record and trigger the overdue notification.",
+      "logic": "for_each",
+      "inputs": {
+        "items": "{{step_1.overdue_tasks}}"
+      },
+      "inner_steps": [
+        {
+          "id": "step_2a",
+          "type": "action",
+          "name": "Send Overdue Notification",
+          "description": "Send the 'Task Overdue' notification to the task's assigned user.",
+          "action": "com.glide.platform_actions.send_notification",
+          "inputs": {
+            "notification": "x_ptms_task_overdue",
+            "record": "{{step_2.item}}",
+            "recipients": "{{step_2.item.assigned_to.email}}"
+          }
+        }
+      ]
+    }
+  ]
+}
+    ]]></flow_definition>
+  </sys_hub_flow>
+
+</unload>

@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 05 - Access Control Lists (ACLs)
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Implements the security matrix for Project Tasks using
+    ServiceNow's ACL (Access Control List) framework.
+
+  SECURITY MATRIX:
+  ┌─────────────────────────┬──────────────────┬────────────────────────┐
+  │ Operation               │ Project Manager  │ Team Member            │
+  ├─────────────────────────┼──────────────────┼────────────────────────┤
+  │ Table: CREATE           │ ✅ Allowed        │ ❌ Denied               │
+  │ Table: READ             │ ✅ All records    │ ✅ Own tasks only       │
+  │ Table: WRITE (UPDATE)   │ ✅ All fields     │ ✅ Limited fields only  │
+  │ Table: DELETE           │ ✅ Allowed        │ ❌ Denied               │
+  ├─────────────────────────┼──────────────────┼────────────────────────┤
+  │ Field: status (write)   │ ✅ All records    │ ✅ Own tasks only       │
+  │ Field: work_notes(write)│ ✅ All records    │ ✅ Own tasks only       │
+  │ Field: All other fields │ ✅ All records    │ ❌ Read-only            │
+  └─────────────────────────┴──────────────────┴────────────────────────┘
+
+  ACL EVALUATION ORDER (ServiceNow processes most specific first):
+    Field-level ACLs → Record-level ACLs → Table-level ACLs
+
+  ACL RECORDS IN THIS FILE:
+    ACL-01: Table READ  — Project Manager (all records)
+    ACL-02: Table READ  — Team Member (own tasks only)
+    ACL-03: Table CREATE — Project Manager only
+    ACL-04: Table WRITE  — Project Manager (all records)
+    ACL-05: Table WRITE  — Team Member (own tasks — limited to field ACLs)
+    ACL-06: Table DELETE — Project Manager only
+    ACL-07: Field WRITE status    — Team Member (own tasks)
+    ACL-08: Field WRITE work_notes — Team Member (own tasks)
+    ACL-09: Field WRITE (deny all other fields) — Team Member
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-01: TABLE READ — Project Manager
+       Allows Project Managers to READ all task records.
+       No row condition needed — all records are visible.
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b1</sys_id>
+
+    <!-- Descriptive name for easy identification in ACL list -->
+    <name>x_ptms_project_task — Table Read — Project Manager</name>
+
+    <!-- Operation this ACL controls -->
+    <operation>read</operation>
+
+    <!-- Object type: 'record' means the whole table/row -->
+    <type>record</type>
+
+    <!-- Apply to our custom table -->
+    <name display_value="x_ptms_project_task">x_ptms_project_task</name>
+
+    <!--
+      Condition Script: None needed.
+      The role check below is sufficient — any Project Manager
+      can see all records.
+    -->
+    <condition/>
+    <script/>
+
+    <!--
+      Role required: x_ptms.project_manager
+      ACL passes if the logged-in user has this role.
+    -->
+    <roles>x_ptms.project_manager</roles>
+
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-02: TABLE READ — Team Member (own tasks only)
+       Allows Team Members to READ only tasks assigned to them.
+       The condition script enforces the row-level filter.
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b2</sys_id>
+    <name>x_ptms_project_task — Table Read — Team Member Own Tasks</name>
+    <operation>read</operation>
+    <type>record</type>
+    <name display_value="x_ptms_project_task">x_ptms_project_task</name>
+
+    <!--
+      CONDITION SCRIPT:
+      gs.getUserID() returns the sys_id of the currently logged-in user.
+      current.assigned_to refers to the 'assigned_to' field on the record.
+      This script returns true ONLY when the record is assigned to the
+      current user, effectively implementing row-level security.
+
+      Note: ACL scripts must return true (access granted) or false (denied).
+    -->
+    <script><![CDATA[
+// ACL-02: Team Member can only read tasks assigned to themselves
+// gs.getUserID() — Returns the sys_id of the currently authenticated user
+// current.assigned_to — The 'assigned_to' field value on this record
+answer = (current.assigned_to == gs.getUserID());
+    ]]></script>
+
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-03: TABLE CREATE — Project Manager only
+       Only Project Managers can create new task records.
+       Team Members are denied by absence of a CREATE ACL
+       for their role (deny by default).
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b3</sys_id>
+    <name>x_ptms_project_task — Table Create — Project Manager</name>
+    <operation>create</operation>
+    <type>record</type>
+    <name display_value="x_ptms_project_task">x_ptms_project_task</name>
+    <condition/>
+    <script/>
+    <roles>x_ptms.project_manager</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-04: TABLE WRITE — Project Manager (all records)
+       Project Managers can update any field on any record.
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b4</sys_id>
+    <name>x_ptms_project_task — Table Write — Project Manager</name>
+    <operation>write</operation>
+    <type>record</type>
+    <name display_value="x_ptms_project_task">x_ptms_project_task</name>
+    <condition/>
+    <script/>
+    <roles>x_ptms.project_manager</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-05: TABLE WRITE — Team Member (own tasks only)
+       Grants Team Members table-level write access to their
+       own tasks. Field-level ACLs (ACL-07 to ACL-09) then
+       restrict WHICH fields they can actually modify.
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b5</sys_id>
+    <name>x_ptms_project_task — Table Write — Team Member Own Tasks</name>
+    <operation>write</operation>
+    <type>record</type>
+    <name display_value="x_ptms_project_task">x_ptms_project_task</name>
+
+    <script><![CDATA[
+// ACL-05: Team Member can only write to tasks assigned to themselves.
+// Field-level ACLs (ACL-07 & ACL-08) further restrict to status/work_notes.
+answer = (current.assigned_to == gs.getUserID());
+    ]]></script>
+
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-06: TABLE DELETE — Project Manager only
+       Only Project Managers can delete task records.
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b6</sys_id>
+    <name>x_ptms_project_task — Table Delete — Project Manager</name>
+    <operation>delete</operation>
+    <type>record</type>
+    <name display_value="x_ptms_project_task">x_ptms_project_task</name>
+    <condition/>
+    <script/>
+    <roles>x_ptms.project_manager</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-07: FIELD WRITE — state (Status) — Team Member
+       Allows Team Members to update the 'state' (Status)
+       field on tasks assigned to them.
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b7</sys_id>
+    <name>x_ptms_project_task.state — Field Write — Team Member</name>
+    <operation>write</operation>
+
+    <!-- 'field' type targets a specific column -->
+    <type>field</type>
+
+    <!-- Table.field notation -->
+    <name display_value="x_ptms_project_task.state">x_ptms_project_task.state</name>
+
+    <script><![CDATA[
+// ACL-07: Team Member can update the Status field only on their own tasks.
+answer = (current.assigned_to == gs.getUserID());
+    ]]></script>
+
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-08: FIELD WRITE — work_notes — Team Member
+       Allows Team Members to add work notes on their tasks.
+       Journal fields (work_notes) are append-only; entries
+       cannot be edited after saving, ensuring audit integrity.
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3b8</sys_id>
+    <name>x_ptms_project_task.work_notes — Field Write — Team Member</name>
+    <operation>write</operation>
+    <type>field</type>
+    <name display_value="x_ptms_project_task.work_notes">
+      x_ptms_project_task.work_notes
+    </name>
+
+    <script><![CDATA[
+// ACL-08: Team Member can add Work Notes only on their own tasks.
+answer = (current.assigned_to == gs.getUserID());
+    ]]></script>
+
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- ═══════════════════════════════════════════════
+       ACL-09: FIELD WRITE DENY — project_name — Team Member
+       Explicitly denies Team Members from writing to the
+       project_name field. Because ACL-05 grants table-level
+       write on own tasks, field-level denies are needed for
+       each protected field.
+
+       Fields protected this way (all deny Team Member write):
+         - project_name
+         - short_description (Task Name)
+         - description
+         - assigned_to
+         - priority
+         - due_date
+       ═══════════════════════════════════════════════ -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3c1</sys_id>
+    <name>x_ptms_project_task.project_name — Field Write — Deny Team Member</name>
+    <operation>write</operation>
+    <type>field</type>
+    <name display_value="x_ptms_project_task.project_name">
+      x_ptms_project_task.project_name
+    </name>
+
+    <script><![CDATA[
+// ACL-09: Deny Team Members from editing the Project Name field.
+// Returns false for team_member role, access denied.
+answer = false;
+    ]]></script>
+
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- Deny Team Member from editing Task Name -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3c2</sys_id>
+    <name>x_ptms_project_task.short_description — Field Write — Deny Team Member</name>
+    <operation>write</operation>
+    <type>field</type>
+    <name display_value="x_ptms_project_task.short_description">
+      x_ptms_project_task.short_description
+    </name>
+    <script><![CDATA[answer = false;]]></script>
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- Deny Team Member from editing Description -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3c3</sys_id>
+    <name>x_ptms_project_task.description — Field Write — Deny Team Member</name>
+    <operation>write</operation>
+    <type>field</type>
+    <name display_value="x_ptms_project_task.description">
+      x_ptms_project_task.description
+    </name>
+    <script><![CDATA[answer = false;]]></script>
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- Deny Team Member from editing Assigned To -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3c4</sys_id>
+    <name>x_ptms_project_task.assigned_to — Field Write — Deny Team Member</name>
+    <operation>write</operation>
+    <type>field</type>
+    <name display_value="x_ptms_project_task.assigned_to">
+      x_ptms_project_task.assigned_to
+    </name>
+    <script><![CDATA[answer = false;]]></script>
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- Deny Team Member from editing Priority -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3c5</sys_id>
+    <name>x_ptms_project_task.priority — Field Write — Deny Team Member</name>
+    <operation>write</operation>
+    <type>field</type>
+    <name display_value="x_ptms_project_task.priority">
+      x_ptms_project_task.priority
+    </name>
+    <script><![CDATA[answer = false;]]></script>
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+  <!-- Deny Team Member from editing Due Date -->
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>e1f2a3b4c5d6e1f2a3b4c5d6e1f2a3c6</sys_id>
+    <name>x_ptms_project_task.due_date — Field Write — Deny Team Member</name>
+    <operation>write</operation>
+    <type>field</type>
+    <name display_value="x_ptms_project_task.due_date">
+      x_ptms_project_task.due_date
+    </name>
+    <script><![CDATA[answer = false;]]></script>
+    <roles>x_ptms.team_member</roles>
+    <active>true</active>
+    <admin_overrides>true</admin_overrides>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_security_acl>
+
+</unload>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 10 - Reports
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Creates four reports using ServiceNow's sys_report table:
+
+    REPORT 1: Tasks by Status
+      Type : Pie Chart
+      Groups records by state (Status) field.
+
+    REPORT 2: Tasks by Priority
+      Type : Bar Chart
+      Groups records by priority field.
+
+    REPORT 3: Tasks by Assigned User
+      Type : Bar Chart
+      Groups records by assigned_to reference field.
+
+    REPORT 4: Overdue Tasks
+      Type : List Report
+      Filters: due_date < today AND state != 4 (Completed)
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       REPORT 1: Tasks by Status (Pie Chart)
+       ═══════════════════════════════════════════════ -->
+  <sys_report action="INSERT_OR_UPDATE">
+    <sys_id>j1k2l3m4n5o6j1k2l3m4n5o6j1k2l3m1</sys_id>
+
+    <!-- Report display title -->
+    <title>PTMS — Tasks by Status</title>
+
+    <description>
+      Pie chart showing the distribution of Project Tasks across
+      all status values: New, In Progress, On Hold, and Completed.
+      Useful for understanding overall project health at a glance.
+    </description>
+
+    <!-- Source table -->
+    <table>x_ptms_project_task</table>
+
+    <!-- No base filter — include all tasks -->
+    <filter/>
+
+    <!-- Chart type: pie -->
+    <type>pie</type>
+
+    <!-- Group by the 'state' (Status) field -->
+    <group_by>state</group_by>
+
+    <!-- Aggregate: COUNT records per group -->
+    <count>count</count>
+
+    <!-- Display style -->
+    <field>state</field>
+
+    <!-- Show chart legend -->
+    <show_legend>true</show_legend>
+
+    <!-- Show percentages on slices -->
+    <show_percentage>true</show_percentage>
+
+    <!-- Scope -->
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+
+    <!-- Roles that can see this report -->
+    <roles>x_ptms.project_manager</roles>
+    <is_public>false</is_public>
+    <active>true</active>
+  </sys_report>
+
+  <!-- ═══════════════════════════════════════════════
+       REPORT 2: Tasks by Priority (Bar Chart)
+       ═══════════════════════════════════════════════ -->
+  <sys_report action="INSERT_OR_UPDATE">
+    <sys_id>j1k2l3m4n5o6j1k2l3m4n5o6j1k2l3m2</sys_id>
+
+    <title>PTMS — Tasks by Priority</title>
+
+    <description>
+      Horizontal bar chart showing task count grouped by priority level
+      (High, Medium, Low). Helps the Project Manager identify which
+      priority tier has the most workload.
+    </description>
+
+    <table>x_ptms_project_task</table>
+    <filter/>
+
+    <!-- Bar chart — good for comparing discrete categories -->
+    <type>bar</type>
+
+    <!-- Group by priority -->
+    <group_by>priority</group_by>
+    <count>count</count>
+    <field>priority</field>
+
+    <!-- Horizontal bars are easier to read for priority comparisons -->
+    <bar_chart_orientation>horizontal</bar_chart_orientation>
+
+    <show_legend>true</show_legend>
+    <show_data_labels>true</show_data_labels>
+
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+    <roles>x_ptms.project_manager</roles>
+    <is_public>false</is_public>
+    <active>true</active>
+  </sys_report>
+
+  <!-- ═══════════════════════════════════════════════
+       REPORT 3: Tasks by Assigned User (Bar Chart)
+       ═══════════════════════════════════════════════ -->
+  <sys_report action="INSERT_OR_UPDATE">
+    <sys_id>j1k2l3m4n5o6j1k2l3m4n5o6j1k2l3m3</sys_id>
+
+    <title>PTMS — Tasks by Assigned User</title>
+
+    <description>
+      Bar chart showing the number of tasks assigned to each team member.
+      Useful for workload balancing — Project Managers can identify
+      overloaded or under-utilised team members.
+    </description>
+
+    <table>x_ptms_project_task</table>
+    <filter/>
+
+    <type>bar</type>
+
+    <!-- Group by the assigned_to reference field -->
+    <!-- ServiceNow automatically uses the display value (user name) -->
+    <group_by>assigned_to</group_by>
+    <count>count</count>
+    <field>assigned_to</field>
+
+    <show_legend>true</show_legend>
+    <show_data_labels>true</show_data_labels>
+
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+    <roles>x_ptms.project_manager</roles>
+    <is_public>false</is_public>
+    <active>true</active>
+  </sys_report>
+
+  <!-- ═══════════════════════════════════════════════
+       REPORT 4: Overdue Tasks (Tabular List)
+       ═══════════════════════════════════════════════ -->
+  <sys_report action="INSERT_OR_UPDATE">
+    <sys_id>j1k2l3m4n5o6j1k2l3m4n5o6j1k2l3m4</sys_id>
+
+    <title>PTMS — Overdue Tasks</title>
+
+    <description>
+      Tabular report listing all Project Tasks that have passed their
+      due date and have not been completed. Includes task number,
+      name, assigned user, due date, and current status.
+      Used for escalation and follow-up by the Project Manager.
+    </description>
+
+    <table>x_ptms_project_task</table>
+
+    <!--
+      FILTER:
+        due_date < javascript:gs.beginningOfToday()  → past due date
+        ^state!=4                                     → not Completed
+      The ^ character in ServiceNow filter syntax = AND
+    -->
+    <filter>due_dateLESSTHANjavascript:gs.beginningOfToday()^state!=4</filter>
+
+    <!-- List/tabular type — shows all matching records as rows -->
+    <type>list</type>
+
+    <!-- Sort by due_date ascending — oldest overdue first -->
+    <order_by>due_date</order_by>
+    <order_by_direction>asc</order_by_direction>
+
+    <!-- Columns to display in the report -->
+    <field>number,short_description,project_name,assigned_to,state,priority,due_date</field>
+
+    <!-- Row limit — 100 records max for performance -->
+    <row_count>100</row_count>
+
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+    <roles>x_ptms.project_manager</roles>
+    <is_public>false</is_public>
+    <active>true</active>
+  </sys_report>
+
+</unload>

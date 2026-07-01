@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 01 - Application Scope
+  Application: Project Task Management System
+  Scope Prefix: x_ptms
+  Author: Final Year Project
+  Version: 1.0.0
+  Description:
+    Creates the scoped application container. All subsequent
+    artifacts (tables, roles, ACLs, flows) live within this
+    scope to ensure isolation and portability.
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       SCOPED APPLICATION RECORD
+       Table: sys_scope (Application)
+       ═══════════════════════════════════════════════ -->
+  <sys_scope action="INSERT_OR_UPDATE">
+
+    <!-- Unique application identifier -->
+    <sys_id>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_id>
+
+    <!-- Display name shown in the application navigator -->
+    <name>Project Task Management System</name>
+
+    <!-- Short description for the application registry -->
+    <short_description>
+      A role-based project task management application with automated
+      workflows, ACL-enforced security, and real-time notifications.
+    </short_description>
+
+    <!-- Scope prefix — all artifacts are namespaced with x_ptms_ -->
+    <scope>x_ptms</scope>
+
+    <!-- Application version -->
+    <version>1.0.0</version>
+
+    <!-- Vendor / author information -->
+    <vendor>Final Year Project Team</vendor>
+
+    <!-- Documentation URL (update with your institution link) -->
+    <documentation_url>https://your-institution.edu/projects/ptms</documentation_url>
+
+    <!-- Active flag -->
+    <active>true</active>
+
+    <!-- Enforce scope — prevents cross-scope access without explicit grants -->
+    <enforce_license>false</enforce_license>
+
+    <!-- Private scope — artifacts are scoped to this app only -->
+    <private>true</private>
+
+    <!--
+      APPLICATION MENU
+      Creates a top-level navigation menu called "Project Tasks"
+      visible in the application navigator sidebar.
+    -->
+    <sys_app_application action="INSERT_OR_UPDATE">
+      <sys_id>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d2</sys_id>
+      <title>Project Tasks</title>
+
+      <!-- Menu hint shown on hover -->
+      <hint>Manage project tasks, assignments, and progress</hint>
+
+      <!-- Display order in the navigator -->
+      <order>100</order>
+
+      <!-- Only show to users with x_ptms.project_manager OR x_ptms.team_member role -->
+      <roles>x_ptms.project_manager,x_ptms.team_member</roles>
+
+      <!-- Navigator category -->
+      <category>custom_app</category>
+    </sys_app_application>
+
+    <!--
+      MODULE: All Tasks (Project Manager view)
+      Accessible only by Project Managers — shows all tasks.
+    -->
+    <sys_app_module action="INSERT_OR_UPDATE">
+      <sys_id>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d3</sys_id>
+      <title>All Tasks</title>
+      <table>x_ptms_project_task</table>
+      <filter>active=true</filter>
+      <view>Default view</view>
+      <roles>x_ptms.project_manager</roles>
+      <order>100</order>
+      <application>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d2</application>
+    </sys_app_module>
+
+    <!--
+      MODULE: My Tasks (Team Member view)
+      Accessible only by Team Members — filters to assigned tasks.
+    -->
+    <sys_app_module action="INSERT_OR_UPDATE">
+      <sys_id>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4</sys_id>
+      <title>My Tasks</title>
+      <table>x_ptms_project_task</table>
+
+      <!--
+        Dynamic filter: javascript:getMyAssignedTasks()
+        Returns tasks where assigned_to = current logged-in user.
+        This is enforced at UI level; ACLs enforce it at data level.
+      -->
+      <filter>assigned_to=javascript:gs.getUserID()</filter>
+      <view>team_member_view</view>
+      <roles>x_ptms.team_member</roles>
+      <order>100</order>
+      <application>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d2</application>
+    </sys_app_module>
+
+    <!--
+      MODULE: Dashboard
+      Shows the project task dashboard to Project Managers.
+    -->
+    <sys_app_module action="INSERT_OR_UPDATE">
+      <sys_id>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d5</sys_id>
+      <title>Dashboard</title>
+      <link_type>DIRECT</link_type>
+      <direct_url>/$pa_dashboard.do?sysparm_dashboard=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3e1</direct_url>
+      <roles>x_ptms.project_manager</roles>
+      <order>200</order>
+      <application>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d2</application>
+    </sys_app_module>
+
+    <!--
+      MODULE: Reports
+      Shows all reports to Project Managers.
+    -->
+    <sys_app_module action="INSERT_OR_UPDATE">
+      <sys_id>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d6</sys_id>
+      <title>Reports</title>
+      <link_type>DIRECT</link_type>
+      <direct_url>/sys_report_list.do?sysparm_query=sys_scope=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</direct_url>
+      <roles>x_ptms.project_manager</roles>
+      <order>300</order>
+      <application>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d2</application>
+    </sys_app_module>
+
+  </sys_scope>
+
+</unload>

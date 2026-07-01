@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 07 - Notifications
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Defines three email notifications using ServiceNow's
+    sys_notification table. HTML templates are embedded and
+    use data pill variables to personalise content.
+
+  NOTIFICATIONS:
+    1. x_ptms_task_assigned
+       Subject : "New Task Assigned: [Task Name]"
+       To      : Assigned Team Member
+       Trigger : Task Created (fired by Flow Designer)
+
+    2. x_ptms_task_completed
+       Subject : "Task Completed: [Task Name]"
+       To      : All Project Managers
+       Trigger : Status changes to Completed (fired by Flow)
+
+    3. x_ptms_task_overdue
+       Subject : "OVERDUE Task: [Task Name] — Immediate Attention Required"
+       To      : Assigned Team Member
+       Trigger : Scheduled daily flow (tasks past due date)
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       NOTIFICATION 1: Task Assigned
+       ═══════════════════════════════════════════════ -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>g1h2i3j4k5l6g1h2i3j4k5l6g1h2i3j1</sys_id>
+
+    <!-- Notification name (used as reference in Flow Designer) -->
+    <name>x_ptms_task_assigned</name>
+
+    <!-- Human-readable label -->
+    <description>
+      Sent to the assigned Team Member when a new Project Task
+      is created and assigned to them. Contains all task details.
+    </description>
+
+    <!-- Table this notification applies to -->
+    <table>x_ptms_project_task</table>
+
+    <!-- Active -->
+    <active>true</active>
+
+    <!-- Send email type -->
+    <type>email</type>
+
+    <!-- Application scope -->
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+
+    <!--
+      SUBJECT LINE
+      ${task.short_description} — ServiceNow variable syntax
+      for the short_description field of the triggering record.
+    -->
+    <subject>
+      [PTMS] New Task Assigned: ${task.short_description} (${task.number})
+    </subject>
+
+    <!--
+      EMAIL BODY (HTML)
+      Uses ServiceNow template variables:
+        ${task.field_name}      → field value from the task record
+        ${task.assigned_to.name} → display value of a reference field
+    -->
+    <message_html><![CDATA[
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+  .container { max-width: 600px; margin: 30px auto; background: #fff;
+               border-radius: 8px; overflow: hidden;
+               box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .header { background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white; padding: 30px 40px; }
+  .header h1 { margin: 0; font-size: 22px; }
+  .header p  { margin: 5px 0 0; opacity: 0.85; font-size: 14px; }
+  .body { padding: 30px 40px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: #666;
+                 text-transform: uppercase; letter-spacing: 0.5px;
+                 margin-bottom: 4px; }
+  .field value { display: block; font-size: 15px; color: #222; font-weight: 500; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 12px;
+           font-size: 12px; font-weight: bold; text-transform: uppercase; }
+  .badge-new { background: #e3f2fd; color: #1565c0; }
+  .badge-high { background: #ffebee; color: #c62828; }
+  .badge-medium { background: #fff8e1; color: #f57f17; }
+  .badge-low { background: #e8f5e9; color: #2e7d32; }
+  .cta { margin: 24px 0; text-align: center; }
+  .cta a { background: #1a73e8; color: white; padding: 12px 30px;
+           border-radius: 6px; text-decoration: none; font-size: 15px;
+           font-weight: bold; }
+  .footer { background: #f9f9f9; padding: 16px 40px; font-size: 12px;
+            color: #888; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📋 New Task Assigned</h1>
+    <p>Project Task Management System</p>
+  </div>
+  <div class="body">
+    <p>Hello <strong>${task.assigned_to.name}</strong>,</p>
+    <p>A new task has been assigned to you. Please review the details below and begin work accordingly.</p>
+
+    <div class="field">
+      <label>Task Number</label>
+      <value><strong>${task.number}</strong></value>
+    </div>
+    <div class="field">
+      <label>Task Name</label>
+      <value>${task.short_description}</value>
+    </div>
+    <div class="field">
+      <label>Project</label>
+      <value>${task.project_name}</value>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <value>${task.description}</value>
+    </div>
+    <div class="field">
+      <label>Priority</label>
+      <value>
+        <span class="badge badge-${task.priority.label.toLowerCase()}">${task.priority.label}</span>
+      </value>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <value><span class="badge badge-new">${task.state.label}</span></value>
+    </div>
+    <div class="field">
+      <label>Due Date</label>
+      <value>${task.due_date}</value>
+    </div>
+
+    <div class="cta">
+      <a href="${URI}/x_ptms_project_task.do?sys_id=${task.sys_id}">
+        View Task →
+      </a>
+    </div>
+
+    <p style="color:#666; font-size:13px;">
+      Please update the task status as you progress, and add work notes for any updates or blockers.
+    </p>
+  </div>
+  <div class="footer">
+    This is an automated notification from the Project Task Management System.
+    Do not reply to this email. For support, contact your Project Manager.
+  </div>
+</div>
+</body>
+</html>
+    ]]></message_html>
+
+    <!-- Plain-text fallback for email clients that don't render HTML -->
+    <message_text><![CDATA[
+Hello ${task.assigned_to.name},
+
+A new task has been assigned to you:
+
+Task Number : ${task.number}
+Task Name   : ${task.short_description}
+Project     : ${task.project_name}
+Priority    : ${task.priority.label}
+Status      : ${task.state.label}
+Due Date    : ${task.due_date}
+
+Description:
+${task.description}
+
+To view and update this task, visit:
+${URI}/x_ptms_project_task.do?sys_id=${task.sys_id}
+
+— Project Task Management System
+    ]]></message_text>
+  </sysevent_email_action>
+
+  <!-- ═══════════════════════════════════════════════
+       NOTIFICATION 2: Task Completed
+       ═══════════════════════════════════════════════ -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>g1h2i3j4k5l6g1h2i3j4k5l6g1h2i3j2</sys_id>
+    <name>x_ptms_task_completed</name>
+    <description>
+      Sent to all Project Managers when a Project Task status
+      changes to Completed.
+    </description>
+    <table>x_ptms_project_task</table>
+    <active>true</active>
+    <type>email</type>
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+    <subject>
+      [PTMS] ✅ Task Completed: ${task.short_description} (${task.number})
+    </subject>
+    <message_html><![CDATA[
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+  .container { max-width: 600px; margin: 30px auto; background: #fff;
+               border-radius: 8px; overflow: hidden;
+               box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .header { background: linear-gradient(135deg, #43a047, #1b5e20);
+            color: white; padding: 30px 40px; }
+  .header h1 { margin: 0; font-size: 22px; }
+  .body { padding: 30px 40px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: #666;
+                 text-transform: uppercase; margin-bottom: 4px; }
+  .complete-badge { display: inline-block; padding: 6px 16px;
+                    background: #e8f5e9; color: #2e7d32;
+                    border-radius: 20px; font-weight: bold; }
+  .cta a { background: #43a047; color: white; padding: 12px 30px;
+           border-radius: 6px; text-decoration: none;
+           font-size: 15px; font-weight: bold; }
+  .footer { background: #f9f9f9; padding: 16px 40px; font-size: 12px;
+            color: #888; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>✅ Task Completed</h1>
+    <p>Project Task Management System</p>
+  </div>
+  <div class="body">
+    <p>Good news! The following task has been marked as <strong>Completed</strong>.</p>
+    <div class="field">
+      <label>Task Number</label>
+      <value><strong>${task.number}</strong></value>
+    </div>
+    <div class="field">
+      <label>Task Name</label>
+      <value>${task.short_description}</value>
+    </div>
+    <div class="field">
+      <label>Project</label>
+      <value>${task.project_name}</value>
+    </div>
+    <div class="field">
+      <label>Completed By</label>
+      <value>${task.assigned_to.name}</value>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <value><span class="complete-badge">✅ Completed</span></value>
+    </div>
+    <div style="margin: 24px 0; text-align: center;">
+      <a href="${URI}/x_ptms_project_task.do?sys_id=${task.sys_id}">View Task Details →</a>
+    </div>
+  </div>
+  <div class="footer">
+    Automated notification from the Project Task Management System.
+  </div>
+</div>
+</body>
+</html>
+    ]]></message_html>
+    <message_text><![CDATA[
+Task Completed Notification
+
+Task ${task.number} — ${task.short_description} has been marked as COMPLETED.
+
+Project    : ${task.project_name}
+Completed By: ${task.assigned_to.name}
+
+View task: ${URI}/x_ptms_project_task.do?sys_id=${task.sys_id}
+
+— Project Task Management System
+    ]]></message_text>
+  </sysevent_email_action>
+
+  <!-- ═══════════════════════════════════════════════
+       NOTIFICATION 3: Task Overdue
+       ═══════════════════════════════════════════════ -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>g1h2i3j4k5l6g1h2i3j4k5l6g1h2i3j3</sys_id>
+    <name>x_ptms_task_overdue</name>
+    <description>
+      Sent to the assigned Team Member when a task's due date
+      has passed and the task is not yet Completed.
+      Fired by the daily scheduled Flow Designer flow.
+    </description>
+    <table>x_ptms_project_task</table>
+    <active>true</active>
+    <type>email</type>
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+    <subject>
+      [PTMS] ⚠️ OVERDUE: ${task.short_description} (${task.number}) — Action Required
+    </subject>
+    <message_html><![CDATA[
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+  .container { max-width: 600px; margin: 30px auto; background: #fff;
+               border-radius: 8px; overflow: hidden;
+               box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .header { background: linear-gradient(135deg, #e53935, #b71c1c);
+            color: white; padding: 30px 40px; }
+  .header h1 { margin: 0; font-size: 22px; }
+  .alert-box { background: #fff8e1; border-left: 4px solid #f57f17;
+               padding: 16px 20px; margin: 20px 0; border-radius: 4px; }
+  .body { padding: 30px 40px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: #666;
+                 text-transform: uppercase; margin-bottom: 4px; }
+  .overdue-badge { display: inline-block; padding: 6px 16px;
+                   background: #ffebee; color: #c62828;
+                   border-radius: 20px; font-weight: bold; }
+  .cta a { background: #e53935; color: white; padding: 12px 30px;
+           border-radius: 6px; text-decoration: none;
+           font-size: 15px; font-weight: bold; }
+  .footer { background: #f9f9f9; padding: 16px 40px; font-size: 12px;
+            color: #888; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>⚠️ Overdue Task Alert</h1>
+    <p>Project Task Management System</p>
+  </div>
+  <div class="body">
+    <div class="alert-box">
+      <strong>⏰ Action Required:</strong> This task is past its due date.
+      Please update the status or contact your Project Manager.
+    </div>
+    <p>Hello <strong>${task.assigned_to.name}</strong>,</p>
+    <p>The following task assigned to you is <strong>overdue</strong>:</p>
+    <div class="field">
+      <label>Task Number</label>
+      <value><strong>${task.number}</strong></value>
+    </div>
+    <div class="field">
+      <label>Task Name</label>
+      <value>${task.short_description}</value>
+    </div>
+    <div class="field">
+      <label>Project</label>
+      <value>${task.project_name}</value>
+    </div>
+    <div class="field">
+      <label>Due Date</label>
+      <value><span class="overdue-badge">⚠️ ${task.due_date} (OVERDUE)</span></value>
+    </div>
+    <div class="field">
+      <label>Current Status</label>
+      <value>${task.state.label}</value>
+    </div>
+    <div style="margin: 24px 0; text-align: center;">
+      <a href="${URI}/x_ptms_project_task.do?sys_id=${task.sys_id}">Update Task Now →</a>
+    </div>
+  </div>
+  <div class="footer">
+    Automated daily overdue check — Project Task Management System.
+  </div>
+</div>
+</body>
+</html>
+    ]]></message_html>
+    <message_text><![CDATA[
+OVERDUE TASK ALERT
+
+Hello ${task.assigned_to.name},
+
+Task ${task.number} — "${task.short_description}" is OVERDUE.
+
+Due Date : ${task.due_date}
+Status   : ${task.state.label}
+Project  : ${task.project_name}
+
+Please update the task status immediately or contact your Project Manager.
+
+View and update task: ${URI}/x_ptms_project_task.do?sys_id=${task.sys_id}
+
+— Project Task Management System (Automated Alert)
+    ]]></message_text>
+  </sysevent_email_action>
+
+</unload>

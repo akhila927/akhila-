@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 09 - Dashboard & Performance Analytics Widgets
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Creates the Project Task Management Dashboard with 5 KPI
+    widgets using ServiceNow's Performance Analytics (PA) module.
+
+  Dashboard: PTMS Overview Dashboard
+  Widgets:
+    1. Total Tasks       — Count of all records
+    2. Open Tasks        — Count where state = 1 (New)
+    3. In Progress Tasks — Count where state = 2
+    4. Completed Tasks   — Count where state = 4
+    5. High Priority     — Count where priority = 1
+
+  Implementation:
+    PA Indicators → PA Scores → Dashboard → Widgets
+    Each widget is a "Single Score" indicator tile.
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       DASHBOARD CONTAINER
+       pa_dashboard — the canvas that holds all widgets
+       ═══════════════════════════════════════════════ -->
+  <pa_dashboard action="INSERT_OR_UPDATE">
+    <sys_id>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3e1</sys_id>
+    <name>PTMS Overview Dashboard</name>
+    <description>
+      Executive dashboard for the Project Task Management System.
+      Displays real-time KPI widgets: Total, Open, In-Progress,
+      Completed, and High-Priority task counts.
+    </description>
+    <active>true</active>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_dashboard>
+
+  <!-- ═══════════════════════════════════════════════
+       INDICATOR 1: Total Tasks
+       ═══════════════════════════════════════════════ -->
+  <pa_indicator action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l1</sys_id>
+    <name>PTMS - Total Tasks</name>
+    <description>Total number of Project Task records in the system.</description>
+
+    <!-- Aggregation type: COUNT = count all records matching the query -->
+    <aggregate>COUNT</aggregate>
+
+    <!-- Source table -->
+    <table>x_ptms_project_task</table>
+
+    <!-- No filter — count ALL tasks -->
+    <filter/>
+
+    <!-- Direction: higher is not necessarily better (neutral) -->
+    <direction>0</direction>
+
+    <active>true</active>
+    <unit/>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_indicator>
+
+  <!-- ═══════════════════════════════════════════════
+       INDICATOR 2: Open (New) Tasks
+       ═══════════════════════════════════════════════ -->
+  <pa_indicator action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l2</sys_id>
+    <name>PTMS - Open Tasks</name>
+    <description>Count of Project Tasks with Status = New (state=1).</description>
+    <aggregate>COUNT</aggregate>
+    <table>x_ptms_project_task</table>
+
+    <!-- Filter: state = 1 (New) -->
+    <filter>state=1</filter>
+
+    <!-- Direction: lower is better (fewer open tasks = better progress) -->
+    <direction>-1</direction>
+
+    <active>true</active>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_indicator>
+
+  <!-- ═══════════════════════════════════════════════
+       INDICATOR 3: In Progress Tasks
+       ═══════════════════════════════════════════════ -->
+  <pa_indicator action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l3</sys_id>
+    <name>PTMS - In Progress Tasks</name>
+    <description>Count of Project Tasks with Status = In Progress (state=2).</description>
+    <aggregate>COUNT</aggregate>
+    <table>x_ptms_project_task</table>
+    <filter>state=2</filter>
+    <direction>1</direction>
+    <active>true</active>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_indicator>
+
+  <!-- ═══════════════════════════════════════════════
+       INDICATOR 4: Completed Tasks
+       ═══════════════════════════════════════════════ -->
+  <pa_indicator action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l4</sys_id>
+    <name>PTMS - Completed Tasks</name>
+    <description>Count of Project Tasks with Status = Completed (state=4).</description>
+    <aggregate>COUNT</aggregate>
+    <table>x_ptms_project_task</table>
+    <filter>state=4</filter>
+
+    <!-- Direction: higher is better — more completions = success -->
+    <direction>1</direction>
+
+    <active>true</active>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_indicator>
+
+  <!-- ═══════════════════════════════════════════════
+       INDICATOR 5: High Priority Tasks
+       ═══════════════════════════════════════════════ -->
+  <pa_indicator action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l5</sys_id>
+    <name>PTMS - High Priority Tasks</name>
+    <description>Count of Project Tasks with Priority = High (priority=1).</description>
+    <aggregate>COUNT</aggregate>
+    <table>x_ptms_project_task</table>
+    <filter>priority=1</filter>
+
+    <!-- Direction: lower is better — fewer high-priority open tasks = healthier project -->
+    <direction>-1</direction>
+
+    <active>true</active>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_indicator>
+
+  <!-- ═══════════════════════════════════════════════
+       DASHBOARD TABS (Layout: 5 widgets in a row)
+       pa_tab — organises widgets within the dashboard
+       ═══════════════════════════════════════════════ -->
+  <pa_tab action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k4a1</sys_id>
+    <name>Overview</name>
+    <dashboard display_value="PTMS Overview Dashboard">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3e1
+    </dashboard>
+    <order>0</order>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_tab>
+
+  <!-- ═══════════════════════════════════════════════
+       DASHBOARD WIDGETS (pa_widget)
+       Each widget is a Single Score card linked
+       to one PA Indicator.
+       ═══════════════════════════════════════════════ -->
+
+  <!-- Widget 1: Total Tasks -->
+  <pa_widget action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k5a1</sys_id>
+    <name>Total Tasks</name>
+    <indicator display_value="PTMS - Total Tasks">
+      i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l1
+    </indicator>
+    <tab display_value="Overview">i1j2k3l4m5n6i1j2k3l4m5n6i1j2k4a1</tab>
+    <widget_type>single_score</widget_type>
+
+    <!-- Grid position: col 0, row 0, width 2 cols, height 2 rows -->
+    <column>0</column>
+    <row>0</row>
+    <width>2</width>
+    <height>2</height>
+
+    <!-- Color theme for this tile -->
+    <color>#1a73e8</color>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_widget>
+
+  <!-- Widget 2: Open Tasks -->
+  <pa_widget action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k5a2</sys_id>
+    <name>Open Tasks</name>
+    <indicator display_value="PTMS - Open Tasks">
+      i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l2
+    </indicator>
+    <tab display_value="Overview">i1j2k3l4m5n6i1j2k3l4m5n6i1j2k4a1</tab>
+    <widget_type>single_score</widget_type>
+    <column>2</column>
+    <row>0</row>
+    <width>2</width>
+    <height>2</height>
+    <color>#f57f17</color>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_widget>
+
+  <!-- Widget 3: In Progress Tasks -->
+  <pa_widget action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k5a3</sys_id>
+    <name>In Progress Tasks</name>
+    <indicator display_value="PTMS - In Progress Tasks">
+      i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l3
+    </indicator>
+    <tab display_value="Overview">i1j2k3l4m5n6i1j2k3l4m5n6i1j2k4a1</tab>
+    <widget_type>single_score</widget_type>
+    <column>4</column>
+    <row>0</row>
+    <width>2</width>
+    <height>2</height>
+    <color>#0288d1</color>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_widget>
+
+  <!-- Widget 4: Completed Tasks -->
+  <pa_widget action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k5a4</sys_id>
+    <name>Completed Tasks</name>
+    <indicator display_value="PTMS - Completed Tasks">
+      i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l4
+    </indicator>
+    <tab display_value="Overview">i1j2k3l4m5n6i1j2k3l4m5n6i1j2k4a1</tab>
+    <widget_type>single_score</widget_type>
+    <column>6</column>
+    <row>0</row>
+    <width>2</width>
+    <height>2</height>
+    <color>#43a047</color>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_widget>
+
+  <!-- Widget 5: High Priority Tasks -->
+  <pa_widget action="INSERT_OR_UPDATE">
+    <sys_id>i1j2k3l4m5n6i1j2k3l4m5n6i1j2k5a5</sys_id>
+    <name>High Priority Tasks</name>
+    <indicator display_value="PTMS - High Priority Tasks">
+      i1j2k3l4m5n6i1j2k3l4m5n6i1j2k3l5
+    </indicator>
+    <tab display_value="Overview">i1j2k3l4m5n6i1j2k3l4m5n6i1j2k4a1</tab>
+    <widget_type>single_score</widget_type>
+    <column>8</column>
+    <row>0</row>
+    <width>2</width>
+    <height>2</height>
+    <color>#e53935</color>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </pa_widget>
+
+</unload>

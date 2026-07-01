@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 02 - Custom Table and Fields
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Defines the x_ptms_project_task table and all 11 fields.
+    This is the core data model of the application.
+
+  Table Name  : x_ptms_project_task
+  Label       : Project Task
+  Plural Label: Project Tasks
+  Extends     : task (sys_db_object)  ← inherits number, state,
+                                         assigned_to from platform
+
+  Fields Defined Here:
+    1.  number          (Auto Number   — inherited from task)
+    2.  project_name    (String        — free-text project name)
+    3.  short_desc      (String        — task name / title)
+    4.  description     (String/HTML   — detailed task description)
+    5.  assigned_to     (Reference     — sys_user, inherited from task)
+    6.  state           (Integer/Choice — status dropdown, inherited)
+    7.  priority        (Integer/Choice — priority dropdown, inherited)
+    8.  due_date        (Date          — custom date field)
+    9.  work_notes      (Journal       — audited notes, inherited)
+    10. sys_created_by  (String        — auto-populated, inherited)
+    11. sys_created_on  (DateTime      — auto-populated, inherited)
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       TABLE DEFINITION
+       sys_db_object — registers the table in ServiceNow
+       ═══════════════════════════════════════════════ -->
+  <sys_db_object action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e1</sys_id>
+
+    <!-- Internal table name (must start with scope prefix) -->
+    <name>x_ptms_project_task</name>
+
+    <!-- Human-readable label shown in UI -->
+    <label>Project Task</label>
+
+    <!-- Plural label used in list views and navigation -->
+    <plural_label>Project Tasks</plural_label>
+
+    <!--
+      Extends the platform 'task' table.
+      Benefits: inherits number, assigned_to, state, priority,
+      work_notes, sys_created_by, sys_created_on automatically.
+      This follows ServiceNow best practice for task-like entities.
+    -->
+    <super_class display_value="Task">task</super_class>
+
+    <!-- Application scope this table belongs to -->
+    <sys_scope display_value="Project Task Management System">
+      a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1
+    </sys_scope>
+
+    <!-- Auto-number prefix for task records (e.g., PTMS0001001) -->
+    <number_prefix>PTMS</number_prefix>
+    <number_digits>7</number_digits>
+    <number_ref display_value="Project Task">x_ptms_project_task</number_ref>
+
+    <!-- Enable auditing to track all field changes -->
+    <is_audited>true</is_audited>
+
+    <!-- Allow text search across record fields -->
+    <is_searchable>true</is_searchable>
+
+    <!-- Track live feed activity for collaborative updates -->
+    <live_feed_enabled>true</live_feed_enabled>
+
+    <!-- Enable the activity formatter (timeline view) -->
+    <activity_due>true</activity_due>
+  </sys_db_object>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 1: Project Name
+       Type: String (100 chars)
+       Required: true
+       ═══════════════════════════════════════════════ -->
+  <sys_dictionary action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e2</sys_id>
+
+    <!-- Parent table -->
+    <name>x_ptms_project_task</name>
+
+    <!-- Field internal name -->
+    <element>project_name</element>
+
+    <!-- Display label in forms and lists -->
+    <column_label>Project Name</column_label>
+
+    <!-- Data type -->
+    <internal_type display_value="String">string</internal_type>
+
+    <!-- Max length -->
+    <max_length>100</max_length>
+
+    <!-- Mandatory — every task must belong to a project -->
+    <mandatory>true</mandatory>
+
+    <!-- Display order on the default form -->
+    <display_value>1</display_value>
+
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_dictionary>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 2: Task Name (short_description)
+       Note: 'short_description' is inherited from the task
+       table. We configure its label and behaviour here.
+       ═══════════════════════════════════════════════ -->
+  <sys_dictionary action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e3</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>short_description</element>
+    <column_label>Task Name</column_label>
+    <internal_type display_value="String">string</internal_type>
+    <max_length>160</max_length>
+
+    <!-- Required — every task must have a name -->
+    <mandatory>true</mandatory>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_dictionary>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 3: Description
+       Type: HTML (rich text) — allows formatted content.
+       Inherited from task as 'description'.
+       ═══════════════════════════════════════════════ -->
+  <sys_dictionary action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e4</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>description</element>
+    <column_label>Description</column_label>
+
+    <!-- HTML type renders a rich text editor on the form -->
+    <internal_type display_value="HTML">html</internal_type>
+    <max_length>8000</max_length>
+    <mandatory>false</mandatory>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_dictionary>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 4: Assigned To
+       Type: Reference → sys_user
+       Inherited from task as 'assigned_to'.
+       Shows a user picker on the form.
+       ═══════════════════════════════════════════════ -->
+  <sys_dictionary action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e5</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>assigned_to</element>
+    <column_label>Assigned To</column_label>
+
+    <!-- Reference type links to another table -->
+    <internal_type display_value="Reference">reference</internal_type>
+
+    <!-- Points to the sys_user (Users) table -->
+    <reference display_value="User [sys_user]">sys_user</reference>
+
+    <!-- Mandatory — every task must have an assignee -->
+    <mandatory>true</mandatory>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_dictionary>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 5: Status (state)
+       Type: Integer (Choice list)
+       Inherited from task as 'state'.
+       Custom choices override platform defaults for this table.
+
+       Choices:
+         1 = New
+         2 = In Progress
+         3 = On Hold
+         4 = Completed
+       ═══════════════════════════════════════════════ -->
+  <sys_dictionary action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e6</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>state</element>
+    <column_label>Status</column_label>
+    <internal_type display_value="Integer">integer</internal_type>
+    <choice>1</choice>
+    <default_value>1</default_value>
+    <mandatory>true</mandatory>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_dictionary>
+
+  <!-- Status Choice: New -->
+  <sys_choice action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3f1</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>state</element>
+    <value>1</value>
+    <label>New</label>
+    <sequence>1</sequence>
+    <!-- Color hint for UI badges -->
+    <hint>Task has been created but not started</hint>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_choice>
+
+  <!-- Status Choice: In Progress -->
+  <sys_choice action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3f2</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>state</element>
+    <value>2</value>
+    <label>In Progress</label>
+    <sequence>2</sequence>
+    <hint>Task is actively being worked on</hint>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_choice>
+
+  <!-- Status Choice: On Hold -->
+  <sys_choice action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3f3</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>state</element>
+    <value>3</value>
+    <label>On Hold</label>
+    <sequence>3</sequence>
+    <hint>Task is paused pending resolution of a blocker</hint>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_choice>
+
+  <!-- Status Choice: Completed -->
+  <sys_choice action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3f4</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>state</element>
+    <value>4</value>
+    <label>Completed</label>
+    <sequence>4</sequence>
+    <hint>Task has been finished and verified</hint>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_choice>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 6: Priority
+       Type: Integer (Choice list) — inherited from task.
+
+       Choices:
+         1 = High
+         2 = Medium
+         3 = Low
+       (Follows ServiceNow convention: 1=highest)
+       ═══════════════════════════════════════════════ -->
+  <sys_dictionary action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e7</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>priority</element>
+    <column_label>Priority</column_label>
+    <internal_type display_value="Integer">integer</internal_type>
+    <choice>1</choice>
+    <default_value>2</default_value>
+    <mandatory>true</mandatory>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_dictionary>
+
+  <!-- Priority Choice: High -->
+  <sys_choice action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3g1</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>priority</element>
+    <value>1</value>
+    <label>High</label>
+    <sequence>1</sequence>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_choice>
+
+  <!-- Priority Choice: Medium -->
+  <sys_choice action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3g2</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>priority</element>
+    <value>2</value>
+    <label>Medium</label>
+    <sequence>2</sequence>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_choice>
+
+  <!-- Priority Choice: Low -->
+  <sys_choice action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3g3</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>priority</element>
+    <value>3</value>
+    <label>Low</label>
+    <sequence>3</sequence>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_choice>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 7: Due Date
+       Type: Date (not DateTime — only calendar date required)
+       ═══════════════════════════════════════════════ -->
+  <sys_dictionary action="INSERT_OR_UPDATE">
+    <sys_id>b1c2d3e4f5a6b1c2d3e4f5a6b1c2d3e8</sys_id>
+    <name>x_ptms_project_task</name>
+    <element>due_date</element>
+    <column_label>Due Date</column_label>
+    <internal_type display_value="Date">glide_date</internal_type>
+    <mandatory>false</mandatory>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_dictionary>
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 8: Work Notes
+       Type: Journal (audited notes field — inherited from task)
+       Stores chronological notes; each entry is timestamped
+       and attributed to the user. Cannot be edited after save.
+       ═══════════════════════════════════════════════ -->
+  <!-- work_notes is inherited from task — no override needed.
+       ACLs will control who can write to this field.         -->
+
+  <!-- ═══════════════════════════════════════════════
+       FIELD 9 & 10: Created By / Created On
+       sys_created_by and sys_created_on are auto-populated
+       by the platform from the task base class. No
+       additional configuration is required here.
+       ═══════════════════════════════════════════════ -->
+
+</unload>

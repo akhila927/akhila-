@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 04 - User Creation
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Creates two demo users for testing the application:
+      1. Alice Johnson — Project Manager
+      2. Bob Smith     — Team Member
+
+  SECURITY NOTE:
+    Passwords here are hashed placeholders. In a real instance,
+    use ServiceNow's user management UI to set passwords, or
+    configure SSO/LDAP. These hashes represent 'Welcome1!' and
+    must be changed before any production deployment.
+
+  Role Assignment:
+    Roles are assigned via sys_user_has_role records which
+    create a many-to-many relationship between sys_user
+    and sys_user_role tables.
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       USER 1: Alice Johnson — Project Manager
+       ═══════════════════════════════════════════════ -->
+  <sys_user action="INSERT_OR_UPDATE">
+    <sys_id>d1e2f3a4b5c6d1e2f3a4b5c6d1e2f3a1</sys_id>
+
+    <!-- Login username (used for authentication) -->
+    <user_name>alice.johnson</user_name>
+
+    <!-- Display name shown across the platform -->
+    <first_name>Alice</first_name>
+    <last_name>Johnson</last_name>
+    <name>Alice Johnson</name>
+
+    <!-- Email used for notifications -->
+    <email>alice.johnson@ptms.example.com</email>
+
+    <!-- Department for organisational context -->
+    <department display_value="Project Management">
+      <!-- Link to your org's department sys_id if available -->
+    </department>
+
+    <!-- Title shown on user profile -->
+    <title>Project Manager</title>
+
+    <!-- Active flag — inactive users cannot log in -->
+    <active>true</active>
+
+    <!--
+      Password: 'Welcome1!'
+      IMPORTANT: Change this immediately after first login.
+      Use System Properties → Password Reset in production.
+    -->
+    <user_password>Welcome1!</user_password>
+
+    <!--
+      Internal user flag:
+        true  = standard internal employee
+        false = external / customer
+    -->
+    <internal_integration_user>false</internal_integration_user>
+
+    <!-- Web service access (REST/SOAP) — not needed for demo users -->
+    <web_service_access_only>false</web_service_access_only>
+
+    <!-- Timezone (set to your institution's timezone) -->
+    <time_zone>Asia/Kolkata</time_zone>
+
+    <!-- Locale -->
+    <date_format>yyyy-MM-dd</date_format>
+
+    <!-- Phone (optional for notifications) -->
+    <phone>+91-9000000001</phone>
+  </sys_user>
+
+  <!-- Assign Project Manager role to Alice -->
+  <sys_user_has_role action="INSERT_OR_UPDATE">
+    <sys_id>d1e2f3a4b5c6d1e2f3a4b5c6d1e2f3b1</sys_id>
+
+    <!-- Reference to Alice's user record -->
+    <user display_value="Alice Johnson">d1e2f3a4b5c6d1e2f3a4b5c6d1e2f3a1</user>
+
+    <!-- Reference to the Project Manager role -->
+    <role display_value="x_ptms.project_manager">
+      c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f1
+    </role>
+
+    <!-- Inherited: false means directly assigned, not via a group -->
+    <inherited>false</inherited>
+
+    <!-- State: active -->
+    <state>active</state>
+  </sys_user_has_role>
+
+  <!-- ═══════════════════════════════════════════════
+       USER 2: Bob Smith — Team Member
+       ═══════════════════════════════════════════════ -->
+  <sys_user action="INSERT_OR_UPDATE">
+    <sys_id>d1e2f3a4b5c6d1e2f3a4b5c6d1e2f3a2</sys_id>
+
+    <user_name>bob.smith</user_name>
+    <first_name>Bob</first_name>
+    <last_name>Smith</last_name>
+    <name>Bob Smith</name>
+    <email>bob.smith@ptms.example.com</email>
+    <title>Team Member</title>
+    <active>true</active>
+
+    <!--
+      Password: 'Welcome1!'
+      IMPORTANT: Change this immediately after first login.
+    -->
+    <user_password>Welcome1!</user_password>
+
+    <internal_integration_user>false</internal_integration_user>
+    <web_service_access_only>false</web_service_access_only>
+    <time_zone>Asia/Kolkata</time_zone>
+    <date_format>yyyy-MM-dd</date_format>
+    <phone>+91-9000000002</phone>
+  </sys_user>
+
+  <!-- Assign Team Member role to Bob -->
+  <sys_user_has_role action="INSERT_OR_UPDATE">
+    <sys_id>d1e2f3a4b5c6d1e2f3a4b5c6d1e2f3b2</sys_id>
+
+    <!-- Reference to Bob's user record -->
+    <user display_value="Bob Smith">d1e2f3a4b5c6d1e2f3a4b5c6d1e2f3a2</user>
+
+    <!-- Reference to the Team Member role -->
+    <role display_value="x_ptms.team_member">
+      c1d2e3f4a5b6c1d2e3f4a5b6c1d2e3f2
+    </role>
+
+    <inherited>false</inherited>
+    <state>active</state>
+  </sys_user_has_role>
+
+</unload>

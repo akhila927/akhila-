@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  UPDATE SET: 08 - UI Forms and List Views
+  Application: Project Task Management System (x_ptms)
+  Description:
+    Configures the form layout and list view columns for the
+    x_ptms_project_task table. Two views are defined:
+
+    1. DEFAULT VIEW (Project Manager view)
+       - All fields visible and editable
+       - Two-column form layout
+       - Related lists: Work Notes history, Audit History
+
+    2. TEAM MEMBER VIEW (team_member_view)
+       - Restricted field display (read-only fields greyed out)
+       - Editable: Status, Work Notes only
+       - Hides admin fields not relevant to team members
+
+  FORM SECTIONS:
+    Section 1: Basic Information
+    Section 2: Assignment & Scheduling
+    Section 3: Work Notes (journal)
+  ============================================================
+-->
+<unload log_date="2026-07-01">
+
+  <!-- ═══════════════════════════════════════════════
+       FORM VIEW 1: Default (Project Manager)
+       ═══════════════════════════════════════════════ -->
+  <sys_ui_view action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k1</sys_id>
+    <name>Default view</name>
+    <title>Default</title>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_view>
+
+  <!-- ═══════════════════════════════════════════════
+       FORM SECTIONS: Default View
+       sys_ui_section defines the visual grouping blocks
+       on the form. Each section has columns.
+       ═══════════════════════════════════════════════ -->
+
+  <!-- SECTION 1: Basic Information -->
+  <sys_ui_section action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k2</sys_id>
+    <name>x_ptms_project_task</name>
+    <caption>Basic Information</caption>
+    <view display_value="Default view">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k1</view>
+    <position>0</position>
+
+    <!-- 2-column layout -->
+    <columns>2</columns>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_section>
+
+  <!-- Form Elements for Section 1 (2-column layout) -->
+  <!-- Row 1, Column 1: Task Number (auto-generated, read-only) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4a1</sys_id>
+    <element>number</element>
+    <section display_value="Basic Information">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k2</section>
+    <position>0</position>
+    <column_label>Task Number</column_label>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Row 1, Column 2: Project Name -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4a2</sys_id>
+    <element>project_name</element>
+    <section display_value="Basic Information">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k2</section>
+    <position>1</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Row 2, Column 1+2 (spanning): Task Name -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4a3</sys_id>
+    <element>short_description</element>
+    <section display_value="Basic Information">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k2</section>
+    <position>2</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Row 3: Description (full width) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4a4</sys_id>
+    <element>description</element>
+    <section display_value="Basic Information">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k2</section>
+    <position>3</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- SECTION 2: Assignment & Scheduling -->
+  <sys_ui_section action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k3</sys_id>
+    <name>x_ptms_project_task</name>
+    <caption>Assignment &amp; Scheduling</caption>
+    <view display_value="Default view">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k1</view>
+    <position>1</position>
+    <columns>2</columns>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_section>
+
+  <!-- Assigned To -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4b1</sys_id>
+    <element>assigned_to</element>
+    <section display_value="Assignment &amp; Scheduling">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k3</section>
+    <position>0</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Due Date -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4b2</sys_id>
+    <element>due_date</element>
+    <section display_value="Assignment &amp; Scheduling">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k3</section>
+    <position>1</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Status -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4b3</sys_id>
+    <element>state</element>
+    <section display_value="Assignment &amp; Scheduling">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k3</section>
+    <position>2</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Priority -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4b4</sys_id>
+    <element>priority</element>
+    <section display_value="Assignment &amp; Scheduling">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k3</section>
+    <position>3</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Created By (read-only) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4b5</sys_id>
+    <element>sys_created_by</element>
+    <section display_value="Assignment &amp; Scheduling">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k3</section>
+    <position>4</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Created On (read-only) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4b6</sys_id>
+    <element>sys_created_on</element>
+    <section display_value="Assignment &amp; Scheduling">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k3</section>
+    <position>5</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- SECTION 3: Work Notes -->
+  <sys_ui_section action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k4</sys_id>
+    <name>x_ptms_project_task</name>
+    <caption>Work Notes</caption>
+    <view display_value="Default view">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k1</view>
+    <position>2</position>
+    <columns>1</columns>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_section>
+
+  <!-- Work Notes journal field -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j4c1</sys_id>
+    <element>work_notes</element>
+    <section display_value="Work Notes">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k4</section>
+    <position>0</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- ═══════════════════════════════════════════════
+       FORM VIEW 2: Team Member View
+       Restricted form with read-only fields.
+       Only Status and Work Notes are editable.
+       ═══════════════════════════════════════════════ -->
+  <sys_ui_view action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k5</sys_id>
+    <name>team_member_view</name>
+    <title>My Task View</title>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_view>
+
+  <!-- Team Member: Task Details Section (all read-only except status) -->
+  <sys_ui_section action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</sys_id>
+    <name>x_ptms_project_task</name>
+    <caption>Task Details</caption>
+    <view display_value="My Task View">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k5</view>
+    <position>0</position>
+    <columns>2</columns>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_section>
+
+  <!-- Task Number (read-only in all views) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a1</sys_id>
+    <element>number</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>0</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Project Name (read-only for team member) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a2</sys_id>
+    <element>project_name</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>1</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Task Name (read-only for team member) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a3</sys_id>
+    <element>short_description</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>2</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Description (read-only) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a4</sys_id>
+    <element>description</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>3</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Priority (read-only for team member) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a5</sys_id>
+    <element>priority</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>4</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Due Date (read-only) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a6</sys_id>
+    <element>due_date</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>5</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Status (EDITABLE for team member — key field) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a7</sys_id>
+    <element>state</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>6</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- Work Notes (EDITABLE for team member — key field) -->
+  <sys_ui_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j5a8</sys_id>
+    <element>work_notes</element>
+    <section display_value="Task Details">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k6</section>
+    <position>7</position>
+    <type>field</type>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_element>
+
+  <!-- ═══════════════════════════════════════════════
+       LIST VIEW: Default (All Tasks — Project Manager)
+       Columns shown in the task list view.
+       ═══════════════════════════════════════════════ -->
+  <sys_ui_list action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</sys_id>
+    <name>x_ptms_project_task</name>
+    <view display_value="Default view">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j3k1</view>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list>
+
+  <!-- List Column: Task Number -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b1</sys_id>
+    <list_id display_value="x_ptms_project_task">h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>number</element>
+    <position>0</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+  <!-- List Column: Task Name -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b2</sys_id>
+    <list_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>short_description</element>
+    <position>1</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+  <!-- List Column: Project Name -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b3</sys_id>
+    <list_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>project_name</element>
+    <position>2</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+  <!-- List Column: Assigned To -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b4</sys_id>
+    <list_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>assigned_to</element>
+    <position>3</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+  <!-- List Column: Status -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b5</sys_id>
+    <list_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>state</element>
+    <position>4</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+  <!-- List Column: Priority -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b6</sys_id>
+    <list_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>priority</element>
+    <position>5</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+  <!-- List Column: Due Date -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b7</sys_id>
+    <list_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>due_date</element>
+    <position>6</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+  <!-- List Column: Created On -->
+  <sys_ui_list_element action="INSERT_OR_UPDATE">
+    <sys_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6b8</sys_id>
+    <list_id>h1i2j3k4l5m6h1i2j3k4l5m6h1i2j6a1</list_id>
+    <element>sys_created_on</element>
+    <position>7</position>
+    <sys_scope>a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d1</sys_scope>
+  </sys_ui_list_element>
+
+</unload>
